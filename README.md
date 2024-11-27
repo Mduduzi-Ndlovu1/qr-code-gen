@@ -4,6 +4,8 @@
 
 This project is a simple yet powerful QR Code Generator built with React. The goal of this project is to provide a user-friendly tool that can generate customized QR codes for different types of content, such as URLs and email links. I created this project to solve the need for a tool that allows easy generation of QR codes with customizable features, such as colors, logos, and the ability to download the generated codes in various formats (PNG and SVG). Whether you're creating QR codes for personal, business, or marketing use, this tool can help streamline the process.
 
+![alt text](image.png)
+
 ## Features
 
 - **Generate QR Codes for Links and Email**: 
