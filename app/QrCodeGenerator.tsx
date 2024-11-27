@@ -19,6 +19,8 @@ import { Input } from '@/components/ui/input';
 import { QRCodeSVG } from 'qrcode.react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { toPng } from 'html-to-image';
+import { saveAs } from "file-saver"
 
 function QrCodeGenerator() {
   const [url, setUrl] = useState("");
@@ -30,6 +32,37 @@ function QrCodeGenerator() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [subject, setSubject] = useState("");
+
+  const handleDownload = (type: "png" | "svg") => {
+    const qrCodeElem = document.getElementById("qr-code");
+    if (qrCodeElem) {
+      if (type === "png") {
+        toPng(qrCodeElem).then((dataUrl) => {
+          saveAs(dataUrl, "qr-code.png");
+        }).catch((err) => {
+          console.log("Error generating PNG QR code", err);
+        });
+      } else if (type === "svg") {
+        const svgElem = qrCodeElem.querySelector("svg");
+
+        if (svgElem) {
+          const saveData = new Blob([svgElem.outerHTML], {
+            type: "image/svg+xml;charset=utf-8",
+          });
+          saveAs(saveData, "qr-code.svg");
+        }
+      }
+    }
+  };
+
+  // Generate the mailto QR code link
+const generateEmailLink = () => {
+  if (email && subject && message) {
+    return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+  }
+  return ''; // If no email, subject, or message, return an empty string
+};
+
 
   return (
     <div className='relative mx-6 flex max-w-[1250px] w-full min-h-[700px] h-full'>
@@ -80,10 +113,7 @@ function QrCodeGenerator() {
                 <TabsContent value='email'>
                   <div className='space-y-4'>
                     <div className='space-y-2'>
-                      <Label
-                        htmlFor='email'
-                        className='font-semibold text-[#057fff]'
-                      >
+                      <Label htmlFor='email' className='font-semibold text-[#057fff]'>
                         Email
                       </Label>
                       <Input
@@ -96,10 +126,7 @@ function QrCodeGenerator() {
                       />
                     </div>
                     <div className='space-y-2'>
-                      <Label
-                        htmlFor='subject'
-                        className='font-semibold text-[#057fff]'
-                      >
+                      <Label htmlFor='subject' className='font-semibold text-[#057fff]'>
                         Subject
                       </Label>
                       <Input
@@ -112,10 +139,7 @@ function QrCodeGenerator() {
                       />
                     </div>
                     <div className='space-y-2'>
-                      <Label
-                        htmlFor='message'
-                        className='font-semibold text-[#057fff]'
-                      >
+                      <Label htmlFor='message' className='font-semibold text-[#057fff]'>
                         Message
                       </Label>
                       <Textarea
@@ -126,11 +150,15 @@ function QrCodeGenerator() {
                         className='w-full border-2 border-white/70 focus:border-[#057fff]/70 rounded-md outline-none focus-visible:ring-0 placeholder:text-gray-400'
                       />
                     </div>
-                    <Button className='py-7 px-8 bg-[#057fff] font-bold rounded-full uppercase'>
+                    <Button
+                      className='py-7 px-8 bg-[#057fff] font-bold rounded-full uppercase'
+                      onClick={() => setUrl(generateEmailLink())}
+                    >
                       Generate Email QR Code
                     </Button>
                   </div>
                 </TabsContent>
+
               </Tabs>
               <div className='space-y-4'>
                 <div className='flex space-x-4'>
@@ -219,7 +247,7 @@ function QrCodeGenerator() {
               <span>
                 <LayoutGrid className='w-12 h-12 text-white absolute top-4 right-4' />
               </span>
-              <div id='qr-code' className='flex justify-center items-center'>
+              <div id='qr-code' className='flex justify-center items-center p-8'>
                 <div className='relative'>
                   <QRCodeSVG
                     value={url}
@@ -240,15 +268,23 @@ function QrCodeGenerator() {
                   {logo && (
                     <img
                       src={logo}
-                      className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12'
+                      className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-md border-none'
                     />
                   )}
                 </div>
               </div>
               <div className='flex justify-center items-center space-x-4'>
-                <Button variant='outline'>
+                <Button variant='outline'
+                  onClick={() => handleDownload('png')}
+                >
                   <Download  className='w-4 h-4 mr-2' />
                   <span>Download PNG</span>
+                </Button>
+                <Button variant='outline'
+                  onClick={() => handleDownload('svg')}
+                >
+                  <Download  className='w-4 h-4 mr-2' />
+                  <span>Download SVG</span>
                 </Button>
               </div>
             </div>
